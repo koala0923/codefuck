@@ -1,0 +1,96 @@
+linux平台上编译安装boost库
+1.首先解压缩
+      tar -zxvf boost_1_45_0.tar.gz 
+2.然后进入解压缩后的文件夹编译boost的编译器jam
+3.执行编译出bjam
+     ./bootstrap.sh
+4.编译完后在这个目录下有编译出的bjam文件
+     bjam
+5.1.45已经将该文件放到了boost的根目录下,不用下述的拷贝了
+     然后在这个目录下运行命令编译:
+6.进行编译
+      ./bjam release install
+      系统默认会将include拷贝到/usr/local/include/boost/中
+                将lib拷贝到/usr/local/lib下
+7.    关于bjam的后面的参数的设置：
+      -sTOOLS=gcc 指定编译器为GCC
+      --includedir=/usr/include/
+8.    指定头文件的安装目录，我安装在/usr/include下。如果安装成功，将在/usr/include/生成目录boost,该目录下就是boost的头文件目录
+      --libdir=/usr/lib/boost 指定boost的库文件的存放位置, 生成的 .a .so 文件将放在该目录下
+      install
+      编译并安装boost3.注意事项安装完成后，为了每次使用时不用输入太多的目录，可以在/etc/profile中加入：BOOST_INCLUDE=/usr/include/boostBOOST_LIB=/usr/lib/boostexport
+      BOOST_INCLUDE BOOST_LIB以后在编译程序时，只需要用：-I$BOOST_INCLUDE -L$BOOST_LIB
+      即可，还要使用-l指定了链接库。也许会出现编译时或者运行时找不到动态库（*.so）的错误把/usr/lib/boost追加到动态链接库配置文件/etc/ld.so.conf中,然后直接运行ldconfig，即可！｛仅测试成功一次的方式：
+ 
+
+我这里这样编译可以通过
+g++ testBoost.cpp -o testBoostexe -lboost_thread
+如果不行,可以将上述
+的include 和lib拷贝到/usr/include/
+ lib拷百到/usr/lib中
+ 
+ 
+1、下载解压
+一般下载tar tar.bz2 tar.gz zip相对linux解压比较方便，而win则是zip rar tar tar.gz tar.bz2。
+linux默认没有rar命令，没有7z命令，win默认没有7z命令，winrar一般装机都有的。
+推荐tar.gz tar.bz2 tar zip都可以。
+Win平台直接用winrar打开解压即可。
+Linux平台tar.gz包使用tar -zxvf，tar tar.bz2使用tar -xjvf，zip包使用unzip -d 目录 xxx.zip
+ 
+网络带宽小可以考虑下载7z的源码包，因为他压缩率高，下载时间短。7z包：boost_1_45_0.7z
+Win平台需要安装7z，装完7z之后winrar也会支持7z包
+Linux平台需要安装7z命令行版本，解压命令:
+#7z x boost_1_45_0.7z
+x 表示以原文件名为解压路径
+使用7z x boost_1_45_0.7z > /dev/null丢弃显示信息，这样更快些，缺点是出错看不到信息。
+ 
+2、先编译bjam（Win平台确保是管理员账户，Linux平台确保是root账户）
+Win平台运行bootstrap.bat
+Linux平台运行bootstrap.sh，如无权限先
+# chmod 755 ./bootstrap.sh
+# chmod 755 ./libs/gil/doc/build.sh
+# chmod 755 ./tools/build/v2/engine/src/build.sh
+# ./bootstrap.sh
+ 
+3、编译boost
+WIN平台
+bjam --toolset=gcc --build-type=complete "--prefix=c:\boost_gcc4.5.0" install
+表示编译所有库：编译出若干lib和dll。
+其中lib（静态库）包括单线程release、多线程release、单线程debug、多线程debug四种版本。
+其中dll（动态库）只包括多线程release、和多线程debug两种，可能因为单线程版动态库实际应用极少。
+默认是安装的VC编译器，使用--toolset=msvc-9.0(gcc)来制定编译器
+默认编译到c:\boost,包括include和lib
+Linux平台
+貌似不支持./bjam --build-type=complete，我们用：
+./bjam release install 编译release库并安装
+./bjam debug install 编译debug库并安装
+头文件默认是/usr/local/include
+库文件默认是/usr/local/lib
+./bjam -sTOOLS=gcc --includedir=目录 --libdir=目录 install
+4、
+Win平台在IDE的配置中加入头文件和库文件路径
+Linux平台
+vi ~/.bash_profile
+最后加入
+export boost='
+-lboost_date_time
+-lboost_filesystem
+-lboost_graph
+-lboost_iostreams
+-lboost_math_c99
+-lboost_math_c99f
+-lboost_math_c99l
+-lboost_math_tr1
+-lboost_math_tr1f
+-lboost_math_tr1l
+-lboost_prg_exec_monitor
+-lboost_program_options
+-lboost_python
+-lboost_regex
+-lboost_serialization
+-lboost_signals
+-lboost_system
+-lboost_unit_test_framework
+-lboost_wave
+-lboost_wserialization'
+以后编译就可以使用g++ xxx.cpp $boost即可。

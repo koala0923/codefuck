@@ -1,0 +1,231 @@
+CMake是一个跨平台的安装(编译)工具,可以用简单的语句来描述所有平台的安装(编译过程)。他能够输出各种各样的makefile或者project文件,能测试编译器所支持的C++特性,类似UNIX下的automake。只是 CMake 的组态档取名为 CmakeLists.txt。Cmake 并不直接建构出最终的软件，而是产生标准的建构档（如 Unix 的 Makefile 或 Windows Visual C++ 的 projects/workspaces），然后再依一般的建构方式使用。这使得熟悉某个集成开发环境（IDE）的开发者可以用标准的方式建构他的软件，这种可以使用各平台的原生建构系统的能力是 CMake 和 SCons 等其他类似系统的区别之处。
+CMake 可以编译源代码、制作程式库、产生适配器（wrapper）、还可以用任意的顺序建构执行档。CMake 支持 in-place 建构（二进档和源代码在同一个目录树中）和 out-of-place 建构（二进档在别的目录里），因此可以很容易从同一个源代码目录树中建构出多个二进档。CMake 也支持静态与动态程式库的建构。
+“CMake”这个名字是“cross platform make”的缩写。虽然名字中含有“make”，但是CMake和Unix上常见的“make”系统是分开的，而且更为高阶。
+ 
+下载：
+      在安装metis-5.0时，安装说明中要求必须安装CMake2.8版本，下面是CMake的安装和使用方法，记录下来以便以后学习。
+在网址 http://www.cmake.org/ 下载你所需要的CMake源码包cmake-2.8.8.tar..gz(版本不同，压缩包后缀不同)，分为Unix/linux版本 和 windows版本 。
+
+1、安装
+有好几种安装CMake 的方法，因你所用的平台而异。
+（1）从源码安装
+Windows
+在CMake 下载页面 上有已编译好的二进制包。它提供的是一个可执行的安装程序。你还可以下载源码包并从源码包编译CMake。CMake下载页面还提供了已释出的源码和访问CVS的指令。
+
+为了从源码树编译CMake，你必须先要安装最新的CMake二进制版本，因为要用它来编译源码树。一旦装好了二进制版本的CMake，你就可以像编译其他项目一样使用CMake编译CMake了。一般来说，这意思是你要选择CMake源码目录作为源目录，然后再指定编译出来的可执行程序结果的位置。
+
+
+Linux, Mac OSX, UNIX & Cygwin
+在CMake 下载页面 上有许多UNIX平台上已经编译好的二进制包。
+
+下面有几种从源码树编译CMake的方法：
+
+解压：tar xvf cmake-2.8.8.tar.gz
+
+进入解压目录：cd cmake-2.8.8
+
+进行如下操作：（选择适合自己的操作步骤）
+
+如果还没有安装CMake，源码树中提供了一个 bootstrap 脚本：
+./bootstrap
+make
+make install
+(注：make install 一步是可选的，CMake 可以在编译目录下运行。)
+
+一个已经安装了的CMake也可以用于编译新版本的CMake：
+cmake .
+make
+make install
+(注：make install 一步是可选的，CMake 可以在编译目录下运行。)
+
+在UNIX上，如果你不是使用的GNU C++编译器，你要告诉bootstrap 脚本你想用哪个编译器。这可以在运行configure命令前通过设置CC和CXX环境变量完成。例如，在一个带有7.3X编译器的SGI平台上，你可以像下面这样编译CMake：
+(setenv CXX CC; setenv CC cc; ./bootstrap)
+make
+make install
+要查看bootstrap脚本的详细参数，请执行 ./bootstrap –help
+
+（2）从二进制安装
+sudo apt-get install cmake
+
+ 
+
+2、cmake 运行
+（1）运行cmake with GUI
+
+如果系统中有curses库的话，cmake将生成一个可执行文件ccmake，它是一个基于文本程序的终端，有点类似windows GUI。
+
+在源码目录中运行ccmake .，生成的二进制文件存放在源码目录下
+
+当然也可以在其他目录下运行ccmake，只是要指定你想编译的源码的路径
+
+ccmake的使用
+
+当我们在源码目录下运行ccmake . 时，终端将显示如下：
+
+ 
+
+当我们键入c时，ccmake将编译
+
+当我们键入方向键时，可以选择cache entry
+
+当我们键入enter时，可以编辑cache entry
+
+当我们键入g时，将生成Makefile，然后退出
+
+当我们键入h时，将弹出帮助文档
+
+当我们键入q时，将退出ccmake
+
+当我们键入t时，可以打开或关闭advanced cache entry
+
+（2）运行cmake from the command line
+
+如果源码没有太多的选项（在CMakeCache.txt文件中)，可以只用cmake .来产生Makefile。
+
+如果源码选项太多，比如VTK，可以把参数-i传递给cmake，如：cmake -i .，
+
+cmake将让你为每一个cache file文件中的选项指定一个值，也能让你增加新的选项到文件CMakeCache.txt中，或者使用ccmake，或者使用CMakeSetup。
+
+当然，也可以传递设置选项的参数给cmake，如：
+
+    cmake -DVARIABLE:TYPE=VALUE .
+
+ 
+
+3、  CMake cache
+
+cmake第一次运行的时候，它将产生一个文件叫CMakeCache.txt，该文件可以被看作一个配置文件，它里面的内容就像传递给configure命令的参数集，CMake GUI可以帮你很容易修改它，当然也可以直接对该文件做修改；如果你的CMakeLists.txt文件做过较大幅度的修改，你需要从cache中删除相关的选项，如果你还没有手动编辑过cache文件，在你重新运行cmake之前需删除它。
+
+4、    Cmake语法
+
+（1）基本概念
+
+cmake使用Cmake  dfjs;dfasfLists.txt文件，该文件用include或者add_subdirectory命令来增加额外的输入文件。
+
+注释行以#开头到该行结尾
+
+命令是由命令名，加括号，括号中的参数用空白隔开，它可以是内建的命令如add_library，或者用户定义的宏或函数
+
+所有的空格，包含空白符，空行，tabs，当然除了用来隔开参数的空白，都被忽略
+
+（2）变量
+
+。字符串
+
+一个字符串是用双引号括起来的，也可以被分隔在多行，如：
+
+set(MY_STRING “this is a string with a
+
+newline in
+
+it”)
+
+在一个字符串中也可以用变量，如：
+
+set(VAR “
+
+hello
+
+world
+
+”)
+
+当执行message(“/${VAR}=${VAR}”)后，将打印：
+
+${VAR}=
+
+hello
+
+world
+
+也可以message(“/n/thello world”)后，将打印：
+
+hello world
+
+。字符串列表
+
+cmake基本的数据类型为字符串，也可以支持字符串列表，如：
+
+set(VAR a;b;c)或set(VAR a b c)将把VAR设置为字符串列表
+
+要使用VAR，可以用${VAR}，如：
+
+command(${VAR})，它相当于command(a b c)
+
+如果想把一个字符串列表作为单个参数传递给命令，可以用双引号，如：
+
+command(“${VAR}”)，相当于command(“a b c”)
+
+（3）流程控制
+
+。判断
+
+if(var)
+
+some_command(...)
+
+        endif(var)
+
+当var的值不为empty，0，N，NO，OFF，FALSE，NOTFOUND
+
+－NOTFOUND，some_command(...)将被执行
+
+。循环
+
+set(VAR a b c)
+
+foreach(f ${VAR})
+
+message(${f})
+
+        endforeach(f)
+
+用变量f依次代替a，b，c执行message()
+
+。宏和函数定义
+
+定义一个宏hello
+
+macro(hello MESSAGE)
+
+message(${MESSAGE})
+
+        endmacro(hello)
+
+调用宏hello
+
+hello(“hello world”)
+
+定义一个函数hello
+
+function(hello MESSAGE)
+
+message(${MESSAGE})
+
+        endfunction(hello)
+
+   （4）正则表达式
+
+很多CMake命令如if，会使用正则表达式作为参数，下面是正则表达式会用到的特殊字符：
+
+^：匹配一行或一个字符串的开头
+
+$：匹配一行或一个字符串的结尾
+
+.：匹配单个字符
+
+[]：匹配方括号中任意字符或字符串
+
+[^]：匹配不是方括号中的字符或字符串
+
+[-]：匹配在dash任意一边的字符
+
+*：匹配0或多个先前的字符序列
+
++：匹配1或多个先前的字符序列
+
+?：匹配0或1个先前的字符序列
+
+()：保存一个匹配的表达式，以便以后使用
+
+参考：http://www.cmake.org/cmake/help/documentation.html
