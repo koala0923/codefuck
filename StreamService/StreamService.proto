@@ -1,0 +1,169 @@
+//协议定义
+
+//包的格式包含包头和包体
+
+//格式定义
+
+			
+//	                       		包头(16字节) 												包体(Protocol Buffer字节流)
+//———————————————————————|————————————————————————————————
+
+
+//格式详细定义
+
+//长度    |版本号 |标志    |服务器ID|命令ID|序列号| 保留  |   包体(Protocol Buffer字节流)
+//——————————————————————————————————————————————————————————————————————————————————————
+//(4字节)|(2字节)|(2字节)|(2字节)    |2字节   | 2字节  | 2字节|         长度不定
+
+
+	//说明
+//长度：		为整个包的长度
+//版本号：	协议的版本号，现在默认为1
+//标志：		包标示，现在默认为1
+//服务器ID：  现在默认为1
+//命令ID：	标示包的种类，详情看各种包的定义
+//序列号：	由客户端初始化，客户端发的第一个包的序列号为1，以后每个包序列号要加1，直到最大值后，再递归为1，再增长。
+//保留字：	现在默认为0
+
+syntax = "proto2";
+package StreamService;
+//协议交互定义
+
+enum MessageCmdID{
+    CID_LOGIN_REQ_MSG               = 0x0101; 	//登陆请求包
+    CID_LOGIN_RES_MSG			          = 0x0102;	  //登陆请求回应包
+    CID_HEARTBEAT_REQ_MSG           = 0x0103;		//心跳包
+    CID_HEARTBEAT_RES_MSG           = 0x0104;		//心跳回应包
+    CID_CALL_REQ_MSG          			= 0X0201;		//通话请求包
+    CID_CALL_RES_MSG         			  = 0X0202; 	//通话请求回应包
+    CID_HANGUP_REQ_MSG				 			= 0X0203; 	//挂断请求包
+}
+//////////////////////////
+//登录 命令ID 0x0101
+//Protocol BUffer Message
+
+message LoginReq{
+	//cmd id 0x0101
+	required string user_name 	= 1; //用户名
+	required string password 	= 2;  //密码
+	optional string	reversed 	= 10; //保留字段
+}
+
+
+//服务器登录应答 命令ID 0x0102
+//Protocol BUffer Message
+
+enum LoginResultType{
+	LOGIN_RESULT_NONE       = 0; //初始结果
+	LOGIN_RESULT_OK  		= 1; //登录成功
+	LOGIN_RESULT_FAILED 	= 2; //登录失败
+}
+
+message LoginRes{
+	//cmd id 0x0102
+	required  LoginResultType	 result_code 	    = 1; 		//登录结果
+	optional  string 			 result_string 		= 2;    	//服务器返回结果字符串
+	optional  string 			 reversed 			= 10;       //保留字段
+} 
+
+
+
+/////////////////////////
+//心跳包 命令ID 0x0103
+//Protocol BUffer Message
+
+message HeartBeatReq{
+	//cmd id 0x0103
+	required string user_name = 1; //用户名
+	required uint32 msg_id = 2;    //心跳序列号心跳开始时初始为1，以后每次心跳加1, 直到最大递归为1
+	optional string reversed = 10;  //保留字段
+}
+
+//服务器心跳应答包 命令ID 0x0104
+//Protocol BUffer Message
+
+message HeartBeatRes{
+	//cmd id 0x0104
+	required string user_name 	= 1; 	//用户名
+	required uint32 msg_id 		= 2;    //心跳序列号，等于对应心跳包中的数字
+	optional string reversed 	= 10;  	//保留字段
+}
+
+
+
+
+///////////////////////
+//一对一语音/视频通话请求包 命令ID 0X0201
+//Protocol BUffer Message
+enum  CallType{
+	CALL_TYPE_NONE         	= 0; //初始结果
+	CALL_TYPE_VOICE   		= 1; //语音通话
+	CALL_TYPE_VIDEO  		= 2; //视频通话
+}
+message CallReq{
+	//cmd id 0X0201
+	required string 	from_user_name   	= 1; 	//发起方的用户名
+	required string 	to_session_name 	= 2;	//受邀方的用户名
+	required CallType 	call_type 	    	= 3;	//发起的类型 语音/视频
+	optional string 	reversed			= 10;	//保留字段
+}
+
+
+
+
+///////////////////////
+//一对一语音/视频通话服务器回应包 命令ID 0X0202
+//Protocol BUffer Message
+
+enum  CallResultType{
+	CALL_Result_NONE         	    = 0; //初始结果
+	CALL_Result_USER_OFFLINE   		= 1; //用户不在线，这种类型由服务端回应
+	CALL_Result_USER_REFUSE			= 2; //用户拒绝接听，这种类型由受邀方客户端发出，服务端转发
+	CALL_Result_USER_ACCEPT  		= 3; //用户同意接听，这种类型由受邀方客户端发出，服务端转发
+}
+
+message CallRes{
+	//cmd id 0X0202
+	required string 			from_user_name   	= 1; 	//受邀方的用户名
+	required string 			to_session_name 	= 2;	//发起方的用户名
+	required CallType 			call_type 	    	= 3;	//发起的类型 语音/视频
+	required CallResultType		call_result_type    = 4;	//用户返回的结果
+	optional string 			reversed			= 10;	//保留字段
+}
+
+
+
+///////////////////////
+//一对一语音/视频通话挂断请求包 命令ID 0X0203
+//Protocol BUffer Message
+
+//此包不用回应，发起方发送命令后就挂断通话， 服务端转发请求， 受邀方接到请求后，挂断电话。
+
+message HangUpReq{
+	//cmd id 0X0203
+	required string 			from_user_name   	= 1; 	//发起方的用户名
+	required string 			to_session_name 	= 2;	//受邀方的用户名
+	required CallType 			call_type 	    	= 3;	//发起的类型 语音/视频
+	optional string 			reversed			= 10;	//保留字段
+}
+
+
+//udp协议格式定义
+
+//格式定义
+//Ptotoco字节流长度(4字节)         Protocol Buffer字节流(长度不定)               音频\视频流(长度不定)
+//―――――――――――――|―――――――――――――――――――|――――――――――――――――――――――――――――――――
+
+//规定打包时一个包的总长度不超过1500字节
+
+//音频\视频流Protocol Buffer 消息定义
+
+//该消息由一个客户的发往服务端，然后又服务端转发给另外一个\多个 客户端，服务端不改变消息内容。
+message StreamExhange{
+	
+	required string 	from_user_name   	= 1; 	//发送音频\视频流的用户名
+	repeated string 	to_session_name 	= 2;	//接收音频\视频流的用户名 ,可以有多个接收方。
+	required CallType 	call_type 	    	= 3;	//发送的类型 语音/视频
+	optional string 	reversed			= 10;	//保留字段
+}
+

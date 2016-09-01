@@ -1,0 +1,5 @@
+2016-06-15 23:40:17.860 LOG_ALARM -----------------  log4z thread started!   ---------------------------- 
+2016-06-15 23:40:17.860 LOG_ALARM logger id=0 key=Main name=StreamService path=./log/ level=1 display=1 
+2016-06-15 23:40:17.911 LOG_DEBUG TcpListenPort = 9006, UdpListenport = 9008 (StrService.cpp):57 
+2016-06-15 23:40:17.911 LOG_DEBUG UDP Service bind() success (UdpService.cpp):72 
+2016-06-15 23:49:49.156 LOG_DEBUG ctrl-c signal ..... (StrService.cpp):22 
