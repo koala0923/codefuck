@@ -1,0 +1,20 @@
+总结下来主要有3种方法：
+1. 用ln将需要的so文件链接到/usr/lib或者/lib这两个默认的目录下边
+ln -s /where/you/install/lib/*.so /usr/lib
+sudo ldconfig
+
+
+2.修改LD_LIBRARY_PATH
+
+export LD_LIBRARY_PATH=/where/you/install/lib:$LD_LIBRARY_PATH
+sudo ldconfig
+
+
+3.修改/etc/ld.so.conf，然后刷新
+
+
+netstat -an -c  | grep 9999
+  tcpdump tcp port 9999 -i lo -X  
+  ens192
+tcpdump tcp port 9006 -i ens192 -X 
+
