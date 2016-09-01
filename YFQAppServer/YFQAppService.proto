@@ -1,0 +1,143 @@
+//协议定义
+
+//包的格式包含包头和包体
+
+//格式定义
+
+			
+//	   包头(16字节) 			包体(Protocol Buffer字节流)
+//———————————————————————|————————————————————————————————
+
+
+//格式详细定义
+
+//长度   |版本号 |标志   |服务器ID   |命令ID  |序列号  | 保留 |   包体(Protocol Buffer字节流)
+//——————————————————————————————————————————————————————————————————————————————————————
+//(4字节)|(2字节)|(2字节)|(2字节)    |2字节   | 2字节  | 2字节|         长度不定
+
+
+//说明
+//长度：		为整个包的长度
+//版本号：		协议的版本号，现在默认为1
+//标志：		包标示，现在默认为1
+//服务器ID：    现在默认为1
+//命令ID：		标示包的种类，详情看各种包的定义
+//序列号：		由客户端初始化，客户端发的第一个包的序列号为1，以后每个包序列号要加1，直到最大值后，再递归为1，再增长。
+//保留字：		现在默认为0
+
+syntax = "proto2";
+package YFQAppService;
+//协议交互定义
+
+enum MessageCmdID{
+    CID_LOGIN_REQ_MSG               = 0x0101; 	//登陆请求包
+    CID_LOGIN_RES_MSG			    = 0x0102;	//登陆请求回应包
+    CID_HEARTBEAT_REQ_MSG           = 0x0103;	//心跳包
+    CID_HEARTBEAT_RES_MSG           = 0x0104;	//心跳回应包
+    CID_LOGINOUT_REQ_MSG            = 0x0105; 	//登出请求包
+    CID_GPS_REQ_MSG          		= 0X0106;	//GPS数据上传包
+    CID_GPS_RES_MSG         	    = 0X0107; 	//GPS数据回应包
+  
+}
+//////////////////////////
+//登录 命令ID 0x0101
+//Protocol BUffer Message
+
+message LoginReq{
+	//cmd id 0x0101
+	required string user_name 	= 1; //用户名
+	required string password 	= 2;  //密码
+	optional string	reversed 	= 10; //保留字段
+}
+
+
+//服务器登录应答 命令ID 0x0102
+//Protocol BUffer Message
+
+enum LoginResultType{
+	LOGIN_RESULT_NONE       = 0; //初始结果
+	LOGIN_RESULT_OK  		= 1; //登录成功
+	LOGIN_RESULT_FAILED 	= 2; //登录失败
+}
+
+message LoginRes{
+	//cmd id 0x0102
+	required  LoginResultType	 result_code 	    = 1; 		//登录结果
+	optional  string 			 result_string 		= 2;    	//服务器返回结果字符串
+	optional  string 			 reversed 			= 10;       //保留字段
+} 
+
+
+
+/////////////////////////
+//心跳包 命令ID 0x0103
+//Protocol BUffer Message
+
+message HeartBeatReq{
+	//cmd id 0x0103
+	required string user_name = 1; //用户名
+	required uint32 msg_id = 2;    //心跳序列号心跳开始时初始为1，以后每次心跳加1, 直到最大递归为1
+	optional string reversed = 10;  //保留字段
+}
+
+//服务器心跳应答包 命令ID 0x0104
+//Protocol BUffer Message
+
+message HeartBeatRes{
+	//cmd id 0x0104
+	required string user_name 	= 1; 	//用户名
+	required uint32 msg_id 		= 2;    //心跳序列号，等于对应心跳包中的数字
+	optional string reversed 	= 10;  	//保留字段
+}
+
+
+
+/////////////////////////
+//登出包 命令ID 0x0105
+//Protocol BUffer Message
+
+message LogoutReq{
+	//cmd id 0x0103
+	required string user_name = 1; //登出用户名，此包服务器不回复，客户端发送此包后，退出登录，断开tcp连接。
+	optional string reversed = 10;  //保留字段
+}
+
+
+
+///////////////////////
+//Gps数据上传请求包 命令ID  0X0105
+//Protocol BUffer Message
+
+message GpsReq{
+	//cmd id 0X0106
+	required string user_name = 1;         //老人用户名
+	required double longitude = 2;       //经度,double类型
+	required double latitude = 3;        //纬度,double类型
+	optional string address = 4;         //老人所在地址
+	optional string date_time = 5;        //时间，格式：YYYY-MM-DD HH:mm:ss
+	optional string user_id = 6;          //老人用户ID
+	optional string reversed = 10;  	//保留字段
+}
+
+
+
+
+///////////////////////
+//Gps数据服务器回应包 命令ID 0X0106
+//Protocol BUffer Message
+
+enum GpsResultType{
+	GPS_RESULT_NONE       = 0; //初始结果
+	GPS_RESULT_OK  		= 1; //处理成功
+	GPS_RESULT_FAILED 	= 2; //处理失败
+}
+
+message GpsRes{
+	//cmd id 0X0107
+	required  GpsResultType	     result_code 	   = 1; 		    //处理结果
+	optional  string 			 result_string 		= 2;    	//服务器返回结果字符串
+	optional  string 			 reversed 			= 10;       //保留字段
+}
+
+
+
